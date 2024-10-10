@@ -83,4 +83,48 @@ export class Trie {
     }
     return prefixMatch || node.isWord
   }
+  /**
+   * Removes a word from the Trie.
+   *
+   * @param word - The word to remove from the Trie.
+   * @returns True if the word was successfully removed; otherwise, false.
+   */
+  public remove(word: string): boolean {
+    return this.removeNode(this.root, word, 0)
+  }
+
+  /**
+   * Helper function to remove a word from the Trie.
+   *
+   * @param node - The current Trie node being examined.
+   * @param word - The word to remove.
+   * @param index - The current character index of the word being checked.
+   * @returns True if the word was successfully removed; otherwise, false.
+   * @private
+   */
+  private removeNode(node: TrieNode, word: string, index: number): boolean {
+    if (index === word.length) {
+      if (!node.isWord) return false  // Word doesn't exist
+      node.isWord = false  // Unmark the end of the word
+
+      // If no children, the node can be removed
+      return Object.keys(node.children).length === 0
+    }
+
+    const char = word[index]
+    const childNode = node.children[char]
+
+    if (!childNode) return false  // Word doesn't exist
+
+    const shouldDeleteChild = this.removeNode(childNode, word, index + 1)
+
+    if (shouldDeleteChild) {
+      delete node.children[char]  // Remove the child reference
+
+      // Return true if current node has no other children and is not end of another word
+      return Object.keys(node.children).length === 0 && !node.isWord
+    }
+
+    return false
+  }
 }
